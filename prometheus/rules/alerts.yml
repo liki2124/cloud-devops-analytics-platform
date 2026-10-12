@@ -1,0 +1,24 @@
+
+groups:
+  - name: cloud-devops-platform-alerts
+    rules:
+      - alert: APIUnavailable
+        expr: up{job="devops-analytics-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cloud DevOps Analytics API is unavailable"
+          description: "Prometheus has been unable to scrape the API for at least one minute."
+
+
+      - alert: HighContainerCPUUsage
+        expr: |
+          100 * sum(rate(container_cpu_usage_seconds_total[5m])) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High aggregate CPU usage"
+          description: "Aggregate container CPU usage has exceeded 0.8 CPU cores for five minutes."
+
