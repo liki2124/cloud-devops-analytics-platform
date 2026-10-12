@@ -1,3 +1,4 @@
+﻿
 name: Cloud DevOps Platform CI
 
 on:
@@ -24,6 +25,14 @@ jobs:
 
       - name: Run automated tests
         run: python -m pytest -v tests
+
+      - name: Validate Prometheus configuration and alert rules
+        run: |
+          docker run --rm \
+            --entrypoint promtool \
+            -v "$GITHUB_WORKSPACE/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:latest \
+            check config /etc/prometheus/prometheus.yml
 
       - name: Build Docker image
         run: docker build -t cloud-devops-analytics-platform:ci .
