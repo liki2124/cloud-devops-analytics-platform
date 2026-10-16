@@ -21,3 +21,16 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
+# Terraform generated files and local state
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/crash.log
+terraform/crash.*.log
+
+# Terraform saved plans
+terraform/*.tfplan
+terraform/*.plan
+
+# Local configuration backups
+backups/*.bak
