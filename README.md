@@ -247,7 +247,48 @@ Open `http://localhost:3000` to access Grafana.
 Prometheus can be used as the data source for dashboards that explore request activity, application latency, and container resource usage.
 
 A configured dashboard should be treated as a separate deliverable unless its dashboard definition is committed to the repository.
+## Kubernetes and Terraform
 
+The project includes a local Kubernetes deployment managed with Terraform. The Kubernetes resources run in the `devops-platform` namespace, separately from the Docker Compose monitoring stack.
+
+### Kubernetes deployment
+
+The `analytics-api` Deployment uses the `cloud-devops-analytics-api:1.0` image and exposes port `8000`. It includes readiness and liveness probes against `/health`, along with CPU and memory resource requests and limits.
+
+The `analytics-api` ClusterIP Service exposes the API inside the Kubernetes cluster.
+
+### Horizontal Pod Autoscaling
+
+The Horizontal Pod Autoscaler (HPA) targets the `analytics-api` Deployment.
+
+- Minimum replicas: 2
+- Maximum replicas: 4
+- Target average CPU utilisation: 70%
+
+The HPA uses Kubernetes resource metrics to adjust the replica count within these limits.
+
+### Terraform
+
+The `terraform/` directory contains configuration for the Kubernetes deployment, autoscaler, and references to the existing namespace and service.
+
+From the repository root, validate and inspect the configuration:
+
+```powershell
+terraform -chdir=terraform validate
+terraform -chdir=terraform plan
+```
+
+Review the proposed changes before applying them. Do not apply a plan without reviewing its proposed actions.
+
+### Verify the deployment
+
+```powershell
+kubectl get deployment,pods,service,hpa -n devops-platform
+kubectl describe hpa analytics-api -n devops-platform
+kubectl top pods -n devops-platform
+```
+
+The `kubectl top` command requires Kubernetes Metrics Server support. HPA resource metrics are separate from the Prometheus scrape targets used by the Docker Compose monitoring stack.
 ## Testing
 
 Run the automated tests locally:
