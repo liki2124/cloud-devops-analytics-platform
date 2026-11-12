@@ -30,13 +30,20 @@ jobs:
       - name: Run automated tests
         run: python -m pytest -v tests
 
-      - name: Validate Prometheus configuration and alert rules
+      - name: Validate Prometheus configuration
         run: |
           docker run --rm \
             --entrypoint promtool \
             -v "$GITHUB_WORKSPACE/prometheus:/etc/prometheus:ro" \
             prom/prometheus:latest \
             check config /etc/prometheus/prometheus.yml
+      - name: Validate Prometheus alert rules
+        run: |
+          docker run --rm \
+            --entrypoint promtool \
+            -v "$GITHUB_WORKSPACE/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:latest \
+            check rules /etc/prometheus/rules/alerts.yml  
 
       - name: Build Docker image
         run: docker build -t cloud-devops-analytics-platform:ci .
